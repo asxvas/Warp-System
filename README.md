@@ -12,4 +12,4 @@ If you want to use this please DM me on Discord, my Discord is (asxv)
 - **/deletewarp (Warp Name)** - Deletes warp with name. Requires admin.
 - **/warp (Warp Name)** - Allows you to use a warp. Each warp requires the previously selected permission.
 ### How does it actually work?
-- This system used tab completions to allow for easy use.
+- This system uses tab completions to allow for easy use.
