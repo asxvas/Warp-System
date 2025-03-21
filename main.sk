@@ -1,0 +1,91 @@
+#===========================================#
+#                                           #
+#                                           #
+#                                           #
+#        Warps 2.0 designed by Asxv!        #
+#                                           #
+#                                           #
+#                                           #
+#===========================================#
+
+options:
+    prefix: #Your Prefix
+    c1: #Color 1
+    c2: # Color 2
+
+    warptime: 100 #Warp timer in ticks (20 ticks is one second)
+
+
+#since this is an newer version of warps nothing bellow this needs to be changed!. It will now auto complete the tab completions
+command /createwarp [<text>] [<text>]:
+    usage: {@prefix} {@c1}/createwarp <warp name> <permission>
+    permission: admin.warp
+    trigger:
+        if arg-1 is set:
+            if arg-2 is set:
+                if {warp::%arg-1%} isn't set:
+                    set {_loc} to location(floor(player's x-coord) + 0.5, floor(player's y-coord), floor(player's z-coord) + 0.5, player's world)
+                    set {_loc}'s yaw to player's yaw
+                    set {_loc}'s pitch to player's pitch
+                    set {warp::%arg-1%} to {_loc}
+                    set {warpPermission::%arg-1%} to arg-2
+                    add arg-1 to {warps::*}
+                    send "{@prefix} {@c1}Warp {@c2}%arg-1% {@c1}was set to {@c2}%{warp::%arg-1%}%{@c1}!"
+                    send "{@prefix} {@c1}Permission for warp {@c2}%arg-1% {@c1}was set to: {@c2}%arg-2%{@c1}"
+                else:
+                    send "{@prefix} {@c1}This warp is already defined, if you want to remove this warp use /deletewarp <warp name>!"
+            else:
+                send "{@prefix} {@c1}/createwarp <warp name> <permission>"
+        else:
+            send "{@prefix} {@c1}/createwarp <warp name> <permission>"
+
+command /deletewarp [<text>]:
+    permission: admin.warp
+    trigger:
+        if arg-1 isn't set:
+            send "{@prefix} {@c1}/delwarp <warpname>"
+        else if {warp::%arg-1%} isn't set:
+            send "{@prefix} {@c1}Warp {@c2}%arg-1%{@c1} Isn't a valid warp!"
+        else:
+            delete {warp::%arg-1%}
+            remove arg-1 from {warps::*}
+            send "{@prefix} {@c1}Warp {@c2}%arg-1%{@c1} was deleted!"
+            send "{@prefix} {@c1}Warp permission {@c2}%{warpPermission::%arg-1%}%{@c1} was deleted!"
+            delete {warpPermission::%arg-1%}
+
+command /warp [<text>]:
+    trigger:
+        if arg-1 isn't set:
+            send "{@prefix} {@c1}/warp <warp name>"
+        else if {warp::%arg-1%} isn't set:
+            send "{@prefix} {@c1}Warp {@c2}%arg-1%{@c1} Isn't a valid warp!"
+        else:
+            if player has permission "%{warpPermission::%arg-1%}%":
+
+                send "{@prefix} {@c1}Teleporting to {@c2}%arg-1%{@c1} in {@c2}%{@warptime}/20% {@c2}seconds{@c1}." to player
+
+                set {_preloc} to player's location
+                set {_i} to 0
+                
+                loop {@warptime} times:
+                    wait 1 tick
+                    if distance between player's location and {_preloc} > 0.5:
+                        send "{@prefix} {@c1}Your teleport was {@c2}cancelled{@c1} because you moved." to player
+                        send action bar "{@c2}Teleport cancelled" to player
+                        stop trigger
+                    set {_remaining ticks} to {@warptime} - {_i}
+                    
+                    send action bar "{@c2}%floor({_remaining ticks} / 20) + 1% {@c1}seconds until teleport" to player
+                    add 1 to {_i}
+
+                teleport player to {warp::%arg-1%}
+                send action bar "{@c2}Teleported!" to player
+                send "{@prefix} {@c1}Teleported to {@c2}%arg-1%{@c1}." to player
+            else:
+                send "{@prefix} {@c1}You dont have access to this warp!"
+
+on tab complete of "/warp":
+    set tab completions for position 1 to {warps::*}
+
+on tab complete of "/deletewarp":
+    set tab completions for position 1 to {warps::*}
